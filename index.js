@@ -1,6 +1,7 @@
 const express = require("express");
 const { default: mongoose } = require("mongoose");
 const app = express();
+
 const AppointmentService = require("./services/AppointmentService")
 
 
@@ -23,9 +24,13 @@ app.get("/cadastro", (req, res) => {
     res.render("create")
 })
 
+app.get("/calendario", (req, res) => {
+    res.render("index")
+})
+
 
 //metodo post que vai pegar os dados inseridos pelo usuario no fomulario
-// var status recebe o metodo do create da classe AppointmentService
+// var status recebe o retorno do metodo create da classe AppointmentService (true / false)
 app.post("/create", async (req,res)=>{
    var status= await AppointmentService.Create(
     req.body.name,
