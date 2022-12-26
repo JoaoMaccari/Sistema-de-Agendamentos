@@ -1,51 +1,46 @@
+// módulos
+const bodyParser = require("body-parser");
 const express = require("express");
+
+const { engine } = require ('express-handlebars');
+const handlebars = require("express-handlebars")
+
 const { default: mongoose } = require("mongoose");
 const app = express();
+const admin = require("./routes/admin")
 
-const AppointmentService = require("./services/AppointmentService")
+const path = require("path")
 
+//    CONFIGURAÇÕES
 
+//body parser
 app.use(express.urlencoded({extended:false}))
 app.use(express.json())
 
-//uso dos arquivos estaticos que estão na pasta public
-app.use(express.static("public"))
+// handlebars
 
-app.set('view engine', 'ejs')
+ app.engine('handlebars', engine({ extname: 'handlebars', defaultLayout: 'main', layoutsDir: __dirname + '/views/layouts/' }))
+app.set('view engine', 'handlebars');
 
+// config string conexão
 mongoose.set("strictQuery", true);
 mongoose.connect("mongodb://127.0.0.1:27017/agendamento",{useNewUrlParser:true, useUnifiedTopology:true})
 
-app.get("/", (req, res) =>{
-    res.send("oi");
+//public
+//avida pra aplicação que quem guarda os arquivos estaticos é a pasta public
+app.use(express.static(path.join(__dirname,"/public")))
+
+
+//  Rotas
+
+//rota sem prefixo via index
+app.get('/index', (req, res) =>{
+    res.send("rota principal")
 })
 
-app.get("/cadastro", (req, res) => {
-    res.render("create")
-})
+//rota utilizando o router
+app.use('/admin', admin)
 
-app.get("/calendario", (req, res) => {
-    res.render("index")
-})
-
-
-//metodo post que vai pegar os dados inseridos pelo usuario no fomulario
-// var status recebe o retorno do metodo create da classe AppointmentService (true / false)
-app.post("/create", async (req,res)=>{
-   var status= await AppointmentService.Create(
-    req.body.name,
-    req.body.email,
-    req.body.description,
-    req.body.cpf,
-    req.body.date,
-    req.body.time
-   )
-
-   if(status){
-    res.redirect("/") //se tudo ok redireciona para pagina inicial
-   }else{
-    res.send("ocorreu um erro")
-   }
-})
-
-app.listen(8080, () =>{});
+app.listen(8080, () =>{
+    console.log("Rodadno")
+});
