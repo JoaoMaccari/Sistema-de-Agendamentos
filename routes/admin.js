@@ -4,7 +4,7 @@ const express = require("express")
 const mongoogse = require("mongoose")
 //chama arquivo do model
 require("../models/Categoria")
-//chama uma função do mongoose que passa a referencia da model para dentro de uma variavelç
+//chama uma função do mongoose que passa a referencia da model para dentro de uma variavel
 const Categoria = mongoogse.model("categorias")
 
 
