@@ -4,7 +4,7 @@ const express = require("express")
 const mongoogse = require("mongoose")
 //chama arquivo do model
 require("../models/Categoria")
-//chama uma função do mongoose que passa a referencia da model para dentro de uma variavel
+//chama uma função do mongoose que passa a referencia da model para dentro de uma variavel. A partir desta variavel que se usa as funções do banco
 const Categoria = mongoogse.model("categorias")
 
 
@@ -25,7 +25,14 @@ router.get('/posts', (req , res) =>{
 })
 
 router.get('/categorias' , (req, res) =>{
-    res.render('admin/categorias')
+    //
+    Categoria.find().sort({date:'desc'}).lean().then((categorias) =>{
+        res.render('admin/categorias', {categorias: categorias})
+    }).catch((err) =>{
+        req.flash('error_msg', "houve um erro ao lista as categorias")
+        res.redirect("/admin")
+    })
+    
 })
 
 router.get('/categorias/add' , (req, res) =>{
@@ -34,16 +41,46 @@ router.get('/categorias/add' , (req, res) =>{
 
 //rota que recebe os dados do form e cadastra no bd
 router.post('/categorias/nova', (req, res)=>{
-    const novaCategoria ={
-        nome: req.body.nome,
-        slug: req.body.slug
+
+    var erros = []
+
+    if(!req.body.nome || typeof req.body.nome == undefined || req.body.nome == null){
+        erros.push({texto: "nome inválido"})
     }
 
-    new Categoria(novaCategoria).save().then(() =>{
-        console.log("categoria salva com sucesso")
-    }).catch(() =>{
-        console.log("erro ao salvar")
+    if(!req.body.slug || typeof req.body.slug == undefined || req.body.nome == null){
+        erros.push({texto: "slug invalido"})
+    }
+
+    if(erros.length > 0) {
+        res.render("admin/addcategorias", {erros: erros})
+    }else{
+        const novaCategoria ={
+            nome: req.body.nome,
+            slug: req.body.slug
+        }
+    
+        new Categoria(novaCategoria).save().then(() =>{
+            req.flash('success_msg', "Categoria criada com sucesso")
+            res.redirect("/admin/categorias")
+        }).catch(() =>{
+            req.flash('error_msg', "Erro ao cadastrar categoria")
+            res.redirect("/admin")
+        })
+
+    }
+    
+})
+
+
+router.get("/categorias/edit/:id",(req, res) =>{
+    Categoria.findOne({_id:req.params.id}).then((Categoria) =>{ 
+        res.render("/admin/editcategorias", {categoria: categoria})
+    }).catch((err) =>{
+        req.flash('error_msg', "Esta categoria não exite")
+        res.redirect("/admin/categorias")
     })
+    
 })
 
 

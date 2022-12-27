@@ -16,4 +16,5 @@ const Categoria = new Schema({
     }
 })
 
+//"categorias" é o nome da tabela 
 mongoose.model("categorias", Categoria)

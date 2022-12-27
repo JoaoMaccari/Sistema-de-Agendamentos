@@ -7,11 +7,34 @@ const handlebars = require("express-handlebars")
 
 const mongoose = require("mongoose");
 const app = express();
+
+const flash = require("connect-flash")
+app.use(flash())
+
 const admin = require("./routes/admin")
 
 const path = require("path")
 
+const session = require("express-session")
+
 //    CONFIGURAÇÕES
+
+//sessão
+
+app.use(session({
+    secret: "chavedaaplicacao",
+    resave: true,
+    saveUninitialized: true
+}))
+//middleware
+
+//registro de variaveis locais para poder usar nas partials
+app.use((req, res, next)=>{
+    res.locals.success_msg = req.flash("success_msg")
+    res.locals.error_msg = req.flash("error_msg")
+    next()
+})
+
 
 //body parser
 app.use(express.json())
